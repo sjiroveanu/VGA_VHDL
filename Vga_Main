@@ -39,6 +39,11 @@ constant yF_square: integer := 100;
 constant xL_square: integer := 300;
 constant yL_square: integer := 300;
 
+signal radius: integer := 20;
+signal Ox: integer := 50;
+signal Oy: integer := 50;
+
+
 begin
 clk_divider: process(clk)
 	begin
@@ -114,8 +119,12 @@ clk_divider: process(clk)
 		end if;
 	end process;
 	
+
+	
 	draw: process(clk25, rst, vPos, hPos, img_select, mem, rgb_select)
-		begin	
+	--variable auxiliar_vPos: integer:= vPos;
+	--variable auxiliar_hPos:	integer:= hPos;
+	begin	
 		if(rst = '1') then 
 			rgb <= "000";	
 		elsif (clk25'event and clk25 = '1') then
@@ -134,21 +143,33 @@ clk_divider: process(clk)
 				end if;
 				elsif(img_select = 2) then
 					if ((hPos >= xF_square and hPos <=xL_square) and (vPos >= yF_square and vPos <=yL_square)) then --triunghi trebuie modificat
-						rgb <=mem(rgb_select);
+						if (vPos <= hPos) then
+							rgb <= mem(rgb_select);
+						else 
+							rgb <= "000";
+						end if;
 					else
 						rgb <="000";
 				end if;
 				else 
-					if ((hPos >= xF_square and hPos <=xL_square) and (vPos >= yF_square and vPos <=yL_square)) then	--cerc trebuie modficat
-						rgb <=mem(rgb_select);
+					if ((vPos >= (Oy - radius)) and (vPos <= (Oy + radius))) then  --cerc trebuie modficat
+						if ((hPos >= (Ox - radius)) and (hPos <= (Ox + radius))) then
+							if ((vPos - Oy)*(vPos - Oy) + (hPos - Ox)*(hPos - Ox) <= radius*radius) then
+								rgb <= mem(rgb_select);	
+							else
+								rgb <= "000";
+							end if;
+						else 
+							rgb <= "000";
+						end if;
 					else
 						rgb <="000";
 				end if;
 				end if;
 			else
-				rgb <= "000";
-		end if;
-		end if;
+				rgb <= "000"; 
+		end if;	--elsif
+		end if; --rst
 	end process;
 end comportamental;
 			
